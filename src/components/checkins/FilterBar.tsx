@@ -65,7 +65,7 @@ const FilterBar = ({ onFilterChange, onExport }: FilterBarProps) => {
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All statuses</SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="missed">Missed</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
@@ -80,7 +80,7 @@ const FilterBar = ({ onFilterChange, onExport }: FilterBarProps) => {
               <SelectValue placeholder="All sites" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All sites</SelectItem>
+              <SelectItem value="all">All sites</SelectItem>
               {sites.map((site) => (
                 <SelectItem key={site.id} value={site.id}>
                   {site.name}

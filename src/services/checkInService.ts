@@ -24,12 +24,14 @@ export const checkInService = {
       }
       
       if (filters.fromDate) {
-        const fromTimestamp = new Date(filters.fromDate).getTime() / 1000;
+        // Convert string date to timestamp number
+        const fromTimestamp = Math.floor(new Date(filters.fromDate).getTime() / 1000);
         query = query.gte('start_timestamp', fromTimestamp);
       }
       
       if (filters.toDate) {
-        const toTimestamp = new Date(filters.toDate).getTime() / 1000;
+        // Convert string date to timestamp number
+        const toTimestamp = Math.floor(new Date(filters.toDate).getTime() / 1000);
         query = query.lte('start_timestamp', toTimestamp);
       }
       
