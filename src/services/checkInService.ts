@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { CheckIn, CheckInsResponse, CheckInFilters } from "@/types/checkIn";
 
@@ -59,7 +60,7 @@ export const checkInService = {
       const { data, error } = await supabase
         .from('checkins_raw')
         .select('*')
-        .eq('id', id)
+        .eq('id', parseInt(id, 10)) // Convert string id to number
         .single();
       
       if (error) throw error;
