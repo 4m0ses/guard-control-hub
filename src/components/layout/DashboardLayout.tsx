@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   BarChart3,
-  Buildings,
+  Building2,
   Clock,
   FileText,
   LayoutDashboard,
@@ -88,7 +88,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       roles: ["admin", "manager", "guard"],
     },
     {
-      icon: <Buildings className="h-5 w-5" />,
+      icon: <Building2 className="h-5 w-5" />,
       label: "Companies",
       href: "/companies",
       roles: ["admin"],
