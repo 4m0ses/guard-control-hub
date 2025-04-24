@@ -16,8 +16,8 @@ interface FilterBarProps {
 
 const FilterBar = ({ onFilterChange, onExport }: FilterBarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [status, setStatus] = useState("");
-  const [siteId, setSiteId] = useState("");
+  const [status, setStatus] = useState("all");
+  const [siteId, setSiteId] = useState("all");
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
   
@@ -33,8 +33,8 @@ const FilterBar = ({ onFilterChange, onExport }: FilterBarProps) => {
   useEffect(() => {
     const filters = {
       search: searchTerm,
-      status,
-      siteId,
+      status: status === "all" ? "" : status,
+      siteId: siteId === "all" ? "" : siteId,
       fromDate: fromDate ? format(fromDate, "yyyy-MM-dd") : "",
       toDate: toDate ? format(toDate, "yyyy-MM-dd") : "",
     };

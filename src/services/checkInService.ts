@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CheckIn, CheckInsResponse, CheckInFilters } from "@/types/checkIn";
 
@@ -24,14 +23,14 @@ export const checkInService = {
       }
       
       if (filters.fromDate) {
-        // Convert string date to timestamp number
-        const fromTimestamp = Math.floor(new Date(filters.fromDate).getTime() / 1000);
+        const date = new Date(filters.fromDate);
+        const fromTimestamp = Math.floor(date.getTime() / 1000);
         query = query.gte('start_timestamp', fromTimestamp);
       }
       
       if (filters.toDate) {
-        // Convert string date to timestamp number
-        const toTimestamp = Math.floor(new Date(filters.toDate).getTime() / 1000);
+        const date = new Date(filters.toDate);
+        const toTimestamp = Math.floor(date.getTime() / 1000);
         query = query.lte('start_timestamp', toTimestamp);
       }
       
