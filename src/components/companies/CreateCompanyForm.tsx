@@ -51,6 +51,7 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
 
   async function onSubmit(data: FormValues) {
     try {
+      // The data object from the form now strictly matches what Supabase expects
       const { error } = await supabase
         .from('companies')
         .insert(data)
