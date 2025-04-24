@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 const formSchema = z.object({
   name: z.string().min(2, "Company name must be at least 2 characters"),
   address: z.string().min(5, "Address must be at least 5 characters"),
+  company_number: z.string().min(2, "Company number must be at least 2 characters"),
   contact_first_name: z.string().min(2, "First name must be at least 2 characters"),
   contact_last_name: z.string().min(2, "Last name must be at least 2 characters"),
   contact_position: z.string().min(2, "Position must be at least 2 characters"),
@@ -41,6 +42,7 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
     defaultValues: {
       name: "",
       address: "",
+      company_number: "",
       contact_first_name: "",
       contact_last_name: "",
       contact_position: "",
@@ -51,7 +53,6 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
 
   async function onSubmit(data: FormValues) {
     try {
-      // The data object from the form now strictly matches what Supabase expects
       const { error } = await supabase
         .from('companies')
         .insert(data)
@@ -99,6 +100,20 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
                   <FormLabel>Address</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter company address" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="company_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter company number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
