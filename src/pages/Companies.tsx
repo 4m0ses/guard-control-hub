@@ -8,11 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Search, Plus, Edit, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateCompanyForm } from "@/components/companies/CreateCompanyForm";
+import { EditCompanyForm } from "@/components/companies/EditCompanyForm";
+import { DeleteCompanyDialog } from "@/components/companies/DeleteCompanyDialog";
 import { toast } from "sonner";
 
 const Companies = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   const { data: companies = [], isLoading, error, refetch } = useQuery({
     queryKey: ['companies'],
@@ -43,6 +48,16 @@ const Companies = () => {
   useEffect(() => {
     refetch();
   }, [refetch]);
+
+  const handleEditClick = (company) => {
+    setSelectedCompany(company);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = (company) => {
+    setSelectedCompany(company);
+    setIsDeleteDialogOpen(true);
+  };
 
   const filteredCompanies = companies.filter(company => 
     company.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -121,10 +136,20 @@ const Companies = () => {
                   <div className="flex justify-between items-center">
                     <CardTitle>{company.name}</CardTitle>
                     <div className="flex space-x-2">
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleEditClick(company)}
+                        title="Edit company"
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleDeleteClick(company)}
+                        title="Delete company"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -161,10 +186,31 @@ const Companies = () => {
           )}
         </div>
 
+        {/* Modals */}
         <CreateCompanyForm 
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={() => refetch()}
         />
+
+        {selectedCompany && (
+          <>
+            <EditCompanyForm
+              isOpen={isEditModalOpen}
+              onClose={() => setIsEditModalOpen(false)}
+              company={selectedCompany}
+              onSuccess={() => refetch()}
+            />
+
+            <DeleteCompanyDialog
+              isOpen={isDeleteDialogOpen}
+              onClose={() => setIsDeleteDialogOpen(false)}
+              companyId={selectedCompany.id}
+              companyName={selectedCompany.name}
+              onSuccess={() => refetch()}
+            />
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,52 +17,71 @@ import { Form } from "@/components/ui/form";
 import { CompanyInfoFields } from "@/components/companies/CompanyInfoFields";
 import { ContactInfoFields } from "@/components/companies/ContactInfoFields";
 
-interface CreateCompanyFormProps {
+interface EditCompanyFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  company: any;
+  onSuccess: () => void;
 }
 
-export function CreateCompanyForm({ isOpen, onClose, onSuccess }: CreateCompanyFormProps) {
+export function EditCompanyForm({ isOpen, onClose, company, onSuccess }: EditCompanyFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CompanyFormValues>({
     resolver: zodResolver(companySchema),
     defaultValues: {
-      name: "",
-      address: "",
-      company_number: "",
-      contact_first_name: "",
-      contact_last_name: "",
-      contact_position: "",
-      contact_phone: "",
-      contact_email: "",
+      name: company?.name || "",
+      address: company?.address || "",
+      company_number: company?.company_number || "",
+      contact_first_name: company?.contact_first_name || "",
+      contact_last_name: company?.contact_last_name || "",
+      contact_position: company?.contact_position || "",
+      contact_phone: company?.contact_phone || "",
+      contact_email: company?.contact_email || "",
     },
   });
 
+  // Update form values when company data changes
+  useEffect(() => {
+    if (company) {
+      form.reset({
+        name: company.name || "",
+        address: company.address || "",
+        company_number: company.company_number || "",
+        contact_first_name: company.contact_first_name || "",
+        contact_last_name: company.contact_last_name || "",
+        contact_position: company.contact_position || "",
+        contact_phone: company.contact_phone || "",
+        contact_email: company.contact_email || "",
+      });
+    }
+  }, [company, form]);
+
   const onSubmit = async (data: CompanyFormValues) => {
+    if (!company?.id) {
+      toast.error("Missing company ID");
+      return;
+    }
+
     setIsSubmitting(true);
-    console.log("Starting company creation with data:", data);
+    console.log(`Updating company ${company.id} with data:`, data);
 
     try {
-      console.log("Attempting to insert company with data:", data);
-      const { data: createdCompany, error } = await supabase
+      const { error } = await supabase
         .from('companies')
-        .insert(data)
-        .select();
+        .update(data)
+        .eq('id', company.id);
 
       if (error) {
-        console.error("Error creating company:", error);
-        toast.error(`Failed to add company: ${error.message}`);
+        console.error("Error updating company:", error);
+        toast.error(`Failed to update company: ${error.message}`);
       } else {
-        console.log("Successfully created company:", createdCompany);
-        toast.success("Company created successfully");
-        form.reset();
-        if (onSuccess) onSuccess();
+        toast.success("Company updated successfully");
+        onSuccess();
         onClose();
       }
     } catch (error) {
-      console.error("Exception in company creation:", error);
+      console.error("Exception updating company:", error);
       toast.error("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
@@ -73,7 +92,7 @@ export function CreateCompanyForm({ isOpen, onClose, onSuccess }: CreateCompanyF
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Company</DialogTitle>
+          <DialogTitle>Edit Company</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -104,7 +123,7 @@ export function CreateCompanyForm({ isOpen, onClose, onSuccess }: CreateCompanyF
                 disabled={isSubmitting}
                 className="bg-secureGuard-blue hover:bg-secureGuard-navy"
               >
-                {isSubmitting ? "Creating..." : "Create Company"}
+                {isSubmitting ? "Updating..." : "Update Company"}
               </Button>
             </DialogFooter>
           </form>
