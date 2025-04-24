@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -16,6 +15,9 @@ import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
 import { useQueryClient } from "@tanstack/react-query"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import type { Database } from "@/integrations/supabase/types"
+
+type CompanyInsert = Database['public']['Tables']['companies']['Insert']
 
 const formSchema = z.object({
   name: z.string().min(2, "Company name must be at least 2 characters"),
@@ -53,10 +55,9 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
 
   async function onSubmit(data: FormValues) {
     try {
-      // Since FormValues is derived from the Zod schema, all fields are required strings
       const { error } = await supabase
         .from('companies')
-        .insert(data)
+        .insert(data as CompanyInsert)
 
       if (error) throw error
 
