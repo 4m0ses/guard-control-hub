@@ -53,6 +53,7 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
 
   async function onSubmit(data: FormValues) {
     try {
+      // Since FormValues is derived from the Zod schema, all fields are required strings
       const { error } = await supabase
         .from('companies')
         .insert(data)
