@@ -21,6 +21,8 @@ interface CreateCompanyFormProps {
 
 export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
   const queryClient = useQueryClient()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
   const form = useForm<CompanyFormValues>({
     resolver: zodResolver(companyFormSchema),
     defaultValues: {
@@ -37,6 +39,7 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
 
   async function onSubmit(data: CompanyFormValues) {
     try {
+      setIsSubmitting(true)
       const { error } = await supabase
         .from('companies')
         .insert(data as CompanyInsert)
@@ -50,6 +53,8 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
     } catch (error) {
       console.error('Error creating company:', error)
       toast.error("Failed to create company")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -66,10 +71,20 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
             <ContactInfoFields form={form} />
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" type="button" onClick={onClose}>
+              <Button 
+                variant="outline" 
+                type="button" 
+                onClick={onClose}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
-              <Button type="submit">Create Company</Button>
+              <Button 
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating..." : "Create Company"}
+              </Button>
             </div>
           </form>
         </Form>
@@ -77,4 +92,3 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
     </Dialog>
   )
 }
-
