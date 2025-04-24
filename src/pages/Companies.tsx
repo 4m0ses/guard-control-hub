@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -17,7 +16,7 @@ const Companies = () => {
   const { data: companies = [], isLoading, error, refetch } = useQuery({
     queryKey: ['companies'],
     queryFn: async () => {
-      console.log("Fetching companies...")
+      console.log("Fetching companies with anon key:", supabase.auth.anon)
       const { data, error } = await supabase
         .from('companies')
         .select('*')
@@ -28,12 +27,11 @@ const Companies = () => {
         throw error
       }
       
-      console.log("Fetched companies data:", data)
+      console.log("Successfully fetched companies:", data)
       return data || []
     },
   })
 
-  // Debug effect to log when component mounts/unmounts and when companies data changes
   useEffect(() => {
     console.log("Companies component mounted or companies data updated")
     return () => {
@@ -41,7 +39,6 @@ const Companies = () => {
     }
   }, [companies])
 
-  // Force refetch on component mount
   useEffect(() => {
     refetch();
   }, [refetch]);
@@ -50,6 +47,25 @@ const Companies = () => {
     company.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     `${company.contact_first_name} ${company.contact_last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (error) {
+    console.error("Query error:", error)
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <h1 className="text-3xl font-bold">Companies</h1>
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <p className="text-red-500">Failed to load companies</p>
+                <Button onClick={() => refetch()}>Try Again</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    )
+  }
 
   return (
     <DashboardLayout>

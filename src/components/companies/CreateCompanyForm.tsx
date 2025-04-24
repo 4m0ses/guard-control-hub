@@ -41,9 +41,8 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
   async function onSubmit(data: CompanyFormValues) {
     try {
       setIsSubmitting(true)
-      console.log("Form data being submitted:", data)
+      console.log("Starting company creation with data:", data)
       
-      // Parse the data before sending it to ensure all fields match the expected types
       const companyData: CompanyInsert = {
         name: data.name,
         address: data.address,
@@ -55,25 +54,26 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
         contact_email: data.contact_email,
       }
       
+      console.log("Attempting to insert company with data:", companyData)
       const { data: insertedData, error } = await supabase
         .from('companies')
         .insert(companyData)
-        .select() // Add select to return the inserted data
+        .select()
 
       if (error) {
-        console.error('Error creating company:', error)
+        console.error('Supabase error creating company:', error)
         toast.error(`Failed to create company: ${error.message}`)
         throw error
       }
 
-      console.log("Inserted company data:", insertedData)
+      console.log("Successfully created company:", insertedData)
       toast.success("Company created successfully")
       queryClient.invalidateQueries({ queryKey: ['companies'] })
       form.reset()
       onClose()
     } catch (error) {
-      console.error('Error creating company:', error)
-      toast.error("Failed to create company")
+      console.error('Error in company creation:', error)
+      toast.error("Failed to create company. Please check the console for details.")
     } finally {
       setIsSubmitting(false)
     }
