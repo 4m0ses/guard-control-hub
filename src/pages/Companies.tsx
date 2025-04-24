@@ -1,25 +1,37 @@
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Edit, Trash2 } from "lucide-react";
-
-// Mock data
-const initialCompanies = [
-  { id: "company1", name: "Sentinel Security Services", address: "123 Main St, Anytown, CA", contactPerson: "John Doe", phone: "(555) 123-4567" },
-  { id: "company2", name: "Guardian Protection Inc.", address: "456 Oak Ave, Somecity, CA", contactPerson: "Jane Smith", phone: "(555) 987-6543" },
-  { id: "company3", name: "Aegis Security Solutions", address: "789 Pine Blvd, Othertown, CA", contactPerson: "Robert Johnson", phone: "(555) 567-8901" },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { CreateCompanyForm } from "@/components/companies/CreateCompanyForm";
 
 const Companies = () => {
-  const [companies, setCompanies] = useState(initialCompanies);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const { data: companies = [], isLoading } = useQuery({
+    queryKey: ['companies'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+      
+      if (error) {
+        console.error('Error fetching companies:', error)
+        throw error
+      }
+      
+      return data || []
+    },
+  })
 
   const filteredCompanies = companies.filter(company => 
     company.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    company.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())
+    `${company.contact_first_name} ${company.contact_last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -27,7 +39,10 @@ const Companies = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Companies</h1>
-          <Button className="bg-secureGuard-blue hover:bg-secureGuard-navy">
+          <Button 
+            className="bg-secureGuard-blue hover:bg-secureGuard-navy"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" /> New Company
           </Button>
         </div>
@@ -43,7 +58,13 @@ const Companies = () => {
         </div>
 
         <div className="grid gap-4">
-          {filteredCompanies.length > 0 ? (
+          {isLoading ? (
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-center">Loading companies...</p>
+              </CardContent>
+            </Card>
+          ) : filteredCompanies.length > 0 ? (
             filteredCompanies.map((company) => (
               <Card key={company.id} className="overflow-hidden">
                 <CardHeader className="bg-muted p-4">
@@ -67,11 +88,13 @@ const Companies = () => {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-muted-foreground">Contact Person</p>
-                      <p>{company.contactPerson}</p>
+                      <p>{`${company.contact_first_name} ${company.contact_last_name}`}</p>
+                      <p className="text-sm text-muted-foreground">{company.contact_position}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-muted-foreground">Phone</p>
-                      <p>{company.phone}</p>
+                      <p className="text-sm font-semibold text-muted-foreground">Contact Info</p>
+                      <p>{company.contact_phone}</p>
+                      <p className="text-sm text-muted-foreground">{company.contact_email}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -80,11 +103,18 @@ const Companies = () => {
           ) : (
             <Card>
               <CardContent className="p-6 text-center">
-                <p className="text-muted-foreground">No companies found. Try adjusting your search.</p>
+                <p className="text-muted-foreground">
+                  {searchTerm ? "No companies found matching your search." : "No companies added yet."}
+                </p>
               </CardContent>
             </Card>
           )}
         </div>
+
+        <CreateCompanyForm 
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+        />
       </div>
     </DashboardLayout>
   );

@@ -72,6 +72,45 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          address: string
+          contact_email: string
+          contact_first_name: string
+          contact_last_name: string
+          contact_phone: string
+          contact_position: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          contact_email: string
+          contact_first_name: string
+          contact_last_name: string
+          contact_phone: string
+          contact_position: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          contact_email?: string
+          contact_first_name?: string
+          contact_last_name?: string
+          contact_phone?: string
+          contact_position?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       incident_reports: {
         Row: {
           created_at: string
