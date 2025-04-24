@@ -1,4 +1,3 @@
-
 import { ReactNode, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +12,7 @@ import {
   Shield,
   Users,
   X,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -64,7 +64,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // Get current path for highlighting active menu item
   const pathname = window.location.pathname;
   
   const handleLogout = () => {
@@ -100,6 +99,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       roles: ["admin", "manager"],
     },
     {
+      icon: <AlertTriangle className="h-5 w-5" />,
+      label: "Incidents",
+      href: "/incidents",
+      roles: ["admin", "manager", "guard"],
+    },
+    {
       icon: <Users className="h-5 w-5" />,
       label: "Users",
       href: "/users",
@@ -126,13 +131,11 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   ];
 
   const filteredMenuItems = menuItems.filter(item => {
-    // Show item if user has any of the required roles
     return item.roles.some(role => hasRole(role));
   });
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Mobile sidebar toggle */}
       {isMobile && (
         <Button
           variant="ghost"
@@ -144,7 +147,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </Button>
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "bg-sidebar w-64 border-r border-sidebar-border flex-shrink-0 flex-col z-40",
@@ -161,7 +163,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         }}
       >
         <div className="flex flex-col h-full">
-          {/* Logo and close button for mobile */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
             <div className="flex items-center">
               <Shield className="h-6 w-6 text-secureGuard-blue" />
@@ -180,7 +181,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             )}
           </div>
           
-          {/* User info */}
           <div className="px-4 py-4 border-b border-sidebar-border">
             <div className="text-sidebar-foreground font-medium">
               {user?.name}
@@ -190,7 +190,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
           </div>
           
-          {/* Navigation */}
           <nav className="px-2 py-4 space-y-1 flex-1 overflow-y-auto">
             {filteredMenuItems.map((item, index) => (
               <SidebarItem
@@ -204,7 +203,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             ))}
           </nav>
           
-          {/* Logout */}
           <div className="px-2 py-4 border-t border-sidebar-border">
             <SidebarItem
               icon={<LogOut className="h-5 w-5" />}
@@ -216,7 +214,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 overflow-auto bg-dashboard-pattern">
         <div className="container mx-auto py-6 px-4 md:px-6">
           {children}

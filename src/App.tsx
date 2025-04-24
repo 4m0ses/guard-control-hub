@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,12 +9,12 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Companies from "./pages/Companies";
 import Sites from "./pages/Sites";
+import Incidents from "./pages/Incidents";
 import CheckIn from "./pages/CheckIn";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Protected route component
 const ProtectedRoute = ({ 
   children, 
   allowedRoles 
@@ -45,7 +44,6 @@ const AppRoutes = () => (
     <Route path="/" element={<Index />} />
     <Route path="/login" element={<Login />} />
     
-    {/* Protected routes */}
     <Route 
       path="/dashboard" 
       element={
@@ -71,6 +69,14 @@ const AppRoutes = () => (
       } 
     />
     <Route 
+      path="/incidents/*" 
+      element={
+        <ProtectedRoute>
+          <Incidents />
+        </ProtectedRoute>
+      } 
+    />
+    <Route 
       path="/checkins" 
       element={
         <ProtectedRoute>
@@ -79,7 +85,6 @@ const AppRoutes = () => (
       } 
     />
 
-    {/* Catch-all route */}
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

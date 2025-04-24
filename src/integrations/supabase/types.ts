@@ -72,12 +72,143 @@ export type Database = {
         }
         Relationships: []
       }
+      incident_reports: {
+        Row: {
+          created_at: string
+          current_version_id: string | null
+          id: string
+          location: string
+          reported_by_user_id: string
+          severity: string
+          site_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_version_id?: string | null
+          id?: string
+          location: string
+          reported_by_user_id: string
+          severity: string
+          site_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_version_id?: string | null
+          id?: string
+          location?: string
+          reported_by_user_id?: string
+          severity?: string
+          site_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_current_version"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "incident_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incident_versions: {
+        Row: {
+          attachment_urls: Json | null
+          created_at: string
+          created_by_user_id: string
+          description: string
+          id: string
+          incident_id: string
+          status: string
+        }
+        Insert: {
+          attachment_urls?: Json | null
+          created_at?: string
+          created_by_user_id: string
+          description: string
+          id?: string
+          incident_id: string
+          status: string
+        }
+        Update: {
+          attachment_urls?: Json | null
+          created_at?: string
+          created_by_user_id?: string
+          description?: string
+          id?: string
+          incident_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_versions_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incident_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          channel: string
+          content: string
+          created_at: string
+          error_message: string | null
+          id: string
+          recipient: string
+          related_id: string | null
+          sent_at: string | null
+          status: string
+          title: string
+          type: string
+        }
+        Insert: {
+          channel: string
+          content: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient: string
+          related_id?: string | null
+          sent_at?: string | null
+          status: string
+          title: string
+          type: string
+        }
+        Update: {
+          channel?: string
+          content?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient?: string
+          related_id?: string | null
+          sent_at?: string | null
+          status?: string
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: string
+      }
+      user_has_site_access: {
+        Args: { user_id: string; site_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
