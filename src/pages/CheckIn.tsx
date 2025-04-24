@@ -1,127 +1,116 @@
 
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import FilterBar from "@/components/checkins/FilterBar";
+import CheckInsTable from "@/components/checkins/CheckInsTable";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { useQuery } from "@tanstack/react-query";
+import { checkInService } from "@/services/checkInService";
+import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Check, Loader2 } from "lucide-react";
 
 const CheckIn = () => {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastCheckIn, setLastCheckIn] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState({
+    status: "",
+    siteId: "",
+    fromDate: "",
+    toDate: "",
+    search: "",
+  });
 
-  // Simulate check-in process
-  const handleCheckIn = async () => {
-    setIsLoading(true);
+  const { data: checkinData, isLoading, error } = useQuery({
+    queryKey: ['checkins', currentPage, filters],
+    queryFn: () => checkInService.getCheckIns({ page: currentPage, ...filters }),
+  });
 
-    try {
-      // Simulate API call to n8n webhook
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const timestamp = new Date().toLocaleTimeString();
-      setLastCheckIn(timestamp);
-
-      toast({
-        title: "Check-in recorded",
-        description: `Your presence was recorded at ${timestamp}.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Check-in failed",
-        description: "There was an error recording your check-in. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
   };
+
+  const handleExport = () => {
+    checkInService.exportCheckIns(filters)
+      .then(() => {
+        toast({
+          title: "Export successful",
+          description: "Your check-in data has been exported to CSV.",
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Export failed",
+          description: "There was an error exporting your data. Please try again.",
+          variant: "destructive",
+        });
+      });
+  };
+
+  const totalPages = checkinData?.total ? Math.ceil(checkinData.total / 10) : 0; // Assuming 10 items per page
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-xl mx-auto">
-        <h1 className="text-3xl font-bold text-center">Guard Check-in</h1>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Check-In Logs</h1>
         
-        <Card className="border-2 border-secureGuard-blue">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Downtown Office Complex</CardTitle>
-            <CardDescription>123 Business Ave, Cityville, CA 92101</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center">
-              <p className="text-muted-foreground mb-2">Current time:</p>
-              <p className="text-xl font-semibold">
-                {new Date().toLocaleTimeString()}
-              </p>
-            </div>
-            
-            {lastCheckIn && (
-              <div className="bg-green-50 border border-green-200 rounded-md p-4 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Check className="h-5 w-5 text-green-600 mr-2" />
-                  <span className="font-medium text-green-800">Successfully Checked In</span>
-                </div>
-                <p className="text-green-700">Last check-in recorded at {lastCheckIn}</p>
-              </div>
-            )}
-            
-            <Button 
-              className="w-full bg-secureGuard-blue hover:bg-secureGuard-navy h-14 text-lg"
-              onClick={handleCheckIn}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Recording...
-                </>
-              ) : (
-                "Check In Now"
-              )}
-            </Button>
-            
-            <p className="text-sm text-center text-muted-foreground">
-              By checking in, you confirm your presence at this location.
-            </p>
-          </CardContent>
-        </Card>
+        <FilterBar onFilterChange={handleFilterChange} onExport={handleExport} />
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Check-in History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {lastCheckIn ? (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center border-b pb-2">
-                  <div>
-                    <p className="font-medium">Today</p>
-                    <p className="text-sm text-muted-foreground">Checked in at {lastCheckIn}</p>
-                  </div>
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Recorded</span>
-                </div>
-                <div className="flex justify-between items-center border-b pb-2">
-                  <div>
-                    <p className="font-medium">Yesterday</p>
-                    <p className="text-sm text-muted-foreground">Checked in at 9:03 AM</p>
-                  </div>
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Recorded</span>
-                </div>
-                <div className="flex justify-between items-center border-b pb-2">
-                  <div>
-                    <p className="font-medium">April 22, 2025</p>
-                    <p className="text-sm text-muted-foreground">Checked in at 8:57 AM</p>
-                  </div>
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Recorded</span>
-                </div>
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-4">
-                No check-ins recorded today
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <div className="text-center py-4">Loading check-in logs...</div>
+        ) : error ? (
+          <Card className="p-6 text-center text-red-600">
+            An error occurred while loading check-in data. Please try again.
+          </Card>
+        ) : checkinData?.data.length === 0 ? (
+          <Card className="p-6 text-center">
+            <p className="text-muted-foreground">No check-in logs found matching your criteria.</p>
+          </Card>
+        ) : (
+          <CheckInsTable checkins={checkinData?.data || []} />
+        )}
+        
+        {totalPages > 0 && (
+          <Pagination className="mt-4">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
+                  disabled={currentPage === 1} 
+                />
+              </PaginationItem>
+              
+              {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                let pageNum = idx + 1;
+                if (totalPages > 5) {
+                  if (currentPage > 3 && currentPage < totalPages - 1) {
+                    pageNum = currentPage - 2 + idx;
+                  } else if (currentPage >= totalPages - 1) {
+                    pageNum = totalPages - 4 + idx;
+                  }
+                }
+                
+                return (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink 
+                      isActive={pageNum === currentPage}
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
+                  disabled={currentPage === totalPages} 
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
       </div>
     </DashboardLayout>
   );
