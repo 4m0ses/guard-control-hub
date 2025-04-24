@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export type Severity = 'low' | 'medium' | 'high' | 'critical';
 export type IncidentStatus = 'reported' | 'investigating' | 'resolved' | 'closed';
@@ -16,11 +15,12 @@ export interface CreateIncidentDTO {
 
 export interface IncidentVersion {
   id: string;
+  incident_id: string;
+  created_by_user_id: string;
   description: string;
   status: IncidentStatus;
-  attachmentUrls: string[] | null;
+  attachment_urls: string[] | null;
   created_at: string;
-  created_by_user_id: string;
 }
 
 export interface Incident {
@@ -30,7 +30,7 @@ export interface Incident {
   severity: Severity;
   site_id: string;
   reported_by_user_id: string;
-  current_version_id: string;
+  current_version_id: string | null;
   created_at: string;
   updated_at: string;
   currentVersion?: IncidentVersion;
@@ -47,7 +47,7 @@ export const incidentService = {
           site_id: data.siteId,
           title: data.title,
           location: data.location,
-          severity: data.severity,
+          severity: data.severity as Severity,
           reported_by_user_id: (await supabase.auth.getUser()).data.user?.id,
         })
         .select()
@@ -61,7 +61,7 @@ export const incidentService = {
         .insert({
           incident_id: incident.id,
           description: data.description,
-          status: 'reported',
+          status: 'reported' as IncidentStatus,
           attachment_urls: data.attachmentUrls,
           created_by_user_id: (await supabase.auth.getUser()).data.user?.id,
         })
@@ -83,10 +83,9 @@ export const incidentService = {
 
       if (updateError) throw updateError;
 
-      return updatedIncident;
+      return updatedIncident as Incident;
     } catch (error) {
       console.error('Error creating incident:', error);
-      toast.error('Failed to create incident');
       return null;
     }
   },
@@ -127,7 +126,6 @@ export const incidentService = {
       return true;
     } catch (error) {
       console.error('Error updating incident:', error);
-      toast.error('Failed to update incident');
       return false;
     }
   },
@@ -145,10 +143,9 @@ export const incidentService = {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Incident;
     } catch (error) {
       console.error('Error fetching incident:', error);
-      toast.error('Failed to fetch incident');
       return null;
     }
   },
@@ -164,10 +161,9 @@ export const incidentService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return data as Incident[];
     } catch (error) {
       console.error('Error fetching incidents:', error);
-      toast.error('Failed to fetch incidents');
       return [];
     }
   }
