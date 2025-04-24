@@ -13,14 +13,11 @@ const severityColors = {
   low: "bg-blue-100 text-blue-800",
   medium: "bg-yellow-100 text-yellow-800",
   high: "bg-orange-100 text-orange-800",
-  critical: "bg-red-100 text-red-800",
 };
 
 const statusColors = {
-  reported: "bg-gray-100 text-gray-800",
-  investigating: "bg-blue-100 text-blue-800",
+  open: "bg-gray-100 text-gray-800",
   resolved: "bg-green-100 text-green-800",
-  closed: "bg-purple-100 text-purple-800",
 };
 
 const Incidents = () => {
@@ -61,7 +58,7 @@ const Incidents = () => {
                     <div className="space-y-1">
                       <CardTitle className="flex items-center gap-2">
                         <AlertTriangle className={`h-5 w-5 ${
-                          incident.severity === 'critical' ? 'text-red-500' : 'text-yellow-500'
+                          incident.severity === 'high' ? 'text-red-500' : 'text-yellow-500'
                         }`} />
                         {incident.title}
                       </CardTitle>
@@ -76,9 +73,9 @@ const Incidents = () => {
                         {incident.severity}
                       </span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        statusColors[incident.currentVersion?.status || 'reported']
+                        statusColors[incident.currentVersion?.status as keyof typeof statusColors || 'open']
                       }`}>
-                        {incident.currentVersion?.status || 'reported'}
+                        {incident.currentVersion?.status || 'open'}
                       </span>
                     </div>
                   </div>

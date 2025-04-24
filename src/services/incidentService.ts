@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export type Severity = 'low' | 'medium' | 'high';
 export type IncidentStatus = 'open' | 'resolved';
@@ -15,25 +16,25 @@ export interface CreateIncidentDTO {
 
 export interface IncidentVersion {
   id: string;
-  incident_report_id: string;
-  edited_by_id: string;
-  edited_at: string;
-  description: string;
-  attachments: string[] | null;
+  incident_id: string;
+  created_by_user_id: string;
   created_at: string;
+  description: string;
+  attachment_urls: string[] | null;
+  status: string;
 }
 
 export interface Incident {
   id: string;
-  guard_id: string;
+  reported_by_user_id: string;
   site_id: string;
-  submitted_at: string;
-  severity: Severity;
-  location_desc: string;
-  status: IncidentStatus;
-  current_version: string | null;
-  raw_payload: any | null;
   created_at: string;
+  updated_at: string;
+  severity: Severity;
+  location: string;
+  status: IncidentStatus;
+  current_version_id: string | null;
+  title: string;
   currentVersion?: IncidentVersion;
   versions?: IncidentVersion[];
 }
@@ -46,10 +47,10 @@ export const incidentService = {
         .from('incident_reports')
         .insert({
           site_id: data.siteId,
-          guard_id: (await supabase.auth.getUser()).data.user?.id,
+          reported_by_user_id: (await supabase.auth.getUser()).data.user?.id,
           severity: data.severity,
-          location_desc: data.locationDesc,
-          status: 'open' as IncidentStatus,
+          location: data.locationDesc,
+          title: data.title,
         })
         .select()
         .single();
@@ -60,10 +61,11 @@ export const incidentService = {
       const { data: version, error: versionError } = await supabase
         .from('incident_versions')
         .insert({
-          incident_report_id: incident.id,
+          incident_id: incident.id,
           description: data.description,
-          attachments: data.attachments,
-          edited_by_id: (await supabase.auth.getUser()).data.user?.id,
+          attachment_urls: data.attachments,
+          created_by_user_id: (await supabase.auth.getUser()).data.user?.id,
+          status: 'open',
         })
         .select()
         .single();
@@ -73,7 +75,7 @@ export const incidentService = {
       // Update the incident with the current version
       const { data: updatedIncident, error: updateError } = await supabase
         .from('incident_reports')
-        .update({ current_version: version.id })
+        .update({ current_version_id: version.id })
         .eq('id', incident.id)
         .select(`
           *,
@@ -83,7 +85,7 @@ export const incidentService = {
 
       if (updateError) throw updateError;
 
-      return updatedIncident as Incident;
+      return updatedIncident as unknown as Incident;
     } catch (error) {
       console.error('Error creating incident:', error);
       return null;
@@ -101,10 +103,11 @@ export const incidentService = {
       const { data: version, error: versionError } = await supabase
         .from('incident_versions')
         .insert({
-          incident_report_id: incidentId,
+          incident_id: incidentId,
           description,
-          attachments,
-          edited_by_id: (await supabase.auth.getUser()).data.user?.id,
+          attachment_urls: attachments,
+          created_by_user_id: (await supabase.auth.getUser()).data.user?.id,
+          status,
         })
         .select()
         .single();
@@ -115,8 +118,7 @@ export const incidentService = {
       const { error: updateError } = await supabase
         .from('incident_reports')
         .update({
-          current_version: version.id,
-          status
+          current_version_id: version.id,
         })
         .eq('id', incidentId);
 
@@ -142,7 +144,7 @@ export const incidentService = {
         .single();
 
       if (error) throw error;
-      return data as Incident;
+      return data as unknown as Incident;
     } catch (error) {
       console.error('Error fetching incident:', error);
       return null;
@@ -160,7 +162,7 @@ export const incidentService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Incident[];
+      return data as unknown as Incident[];
     } catch (error) {
       console.error('Error fetching incidents:', error);
       return [];
