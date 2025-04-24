@@ -5,16 +5,13 @@ import { CheckIn, CheckInsResponse, CheckInFilters } from "@/types/checkIn";
 export const checkInService = {
   async getCheckIns(filters: CheckInFilters): Promise<CheckInsResponse> {
     try {
-      // Default to 10 items per page
       const perPage = filters.perPage || 10;
       const page = filters.page || 1;
       
-      // Start building the query
       let query = supabase
         .from('checkins_raw')
         .select('*', { count: 'exact' });
       
-      // Apply filters if they exist
       if (filters.status) {
         query = query.eq('call_status', filters.status);
       }
@@ -24,23 +21,19 @@ export const checkInService = {
       }
       
       if (filters.fromDate) {
-        const date = new Date(filters.fromDate);
-        const fromTimestamp = Math.floor(date.getTime() / 1000);
+        const fromTimestamp = Math.floor(new Date(filters.fromDate).getTime() / 1000);
         query = query.gte('start_timestamp', fromTimestamp);
       }
       
       if (filters.toDate) {
-        const date = new Date(filters.toDate);
-        const toTimestamp = Math.floor(date.getTime() / 1000);
+        const toTimestamp = Math.floor(new Date(filters.toDate).getTime() / 1000);
         query = query.lte('start_timestamp', toTimestamp);
       }
       
-      // Add pagination
       query = query
         .range((page - 1) * perPage, page * perPage - 1)
         .order('start_timestamp', { ascending: false });
       
-      // Execute the query
       const { data, error, count } = await query;
       
       if (error) throw error;
@@ -60,7 +53,7 @@ export const checkInService = {
       const { data, error } = await supabase
         .from('checkins_raw')
         .select('*')
-        .eq('id', parseInt(id, 10)) // Convert string id to number
+        .eq('id', parseInt(id, 10))
         .single();
       
       if (error) throw error;
@@ -74,20 +67,6 @@ export const checkInService = {
   
   async exportCheckIns(filters: CheckInFilters): Promise<boolean> {
     try {
-      // In a real app, this would call an API endpoint that generates and returns a CSV file
-      // For this example, we'll just return true to simulate a successful export
-      
-      // Imagine here we'd call something like:
-      // const response = await fetch(`/api/checkins/export?${new URLSearchParams(filters)}`);
-      // const blob = await response.blob();
-      // const url = window.URL.createObjectURL(blob);
-      // const a = document.createElement('a');
-      // a.href = url;
-      // a.download = 'checkins-export.csv';
-      // document.body.appendChild(a);
-      // a.click();
-      // a.remove();
-      
       console.log('Exporting check-ins with filters:', filters);
       return true;
     } catch (error) {
