@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CheckIn } from "@/types/checkIn";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { MessageSquare, User, MapPin, Clock, ArrowRight } from "lucide-react";
 import AudioModal from "./AudioModal";
 import TranscriptTooltip from "./TranscriptTooltip";
@@ -25,9 +25,23 @@ const CheckInRow = ({ checkin }: CheckInRowProps) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const formatTimestamp = (timestamp?: number): string => {
+    if (!timestamp) return "Unknown";
+    
+    // Check if timestamp is in seconds (Unix standard) or milliseconds
+    const date = timestamp > 9999999999 
+      ? new Date(timestamp) // It's in milliseconds
+      : new Date(timestamp * 1000); // It's in seconds
+      
+    return format(date, 'MMM d, yyyy h:mm a');
+  };
+
+  const getStatusBadge = (status?: string) => {
+    if (!status) return <Badge variant="secondary">Unknown</Badge>;
+    
+    switch (status.toLowerCase()) {
       case "completed":
+      case "ended":
         return <Badge className="bg-green-500">Completed</Badge>;
       case "missed":
         return <Badge variant="destructive">Missed</Badge>;
@@ -38,8 +52,12 @@ const CheckInRow = ({ checkin }: CheckInRowProps) => {
     }
   };
 
-  // In a real app, we would use real data based on IDs
-  const guardName = "Guard #" + Math.floor(Math.random() * 9000 + 1000);
+  // In a real app, we would use real data based on agent_id
+  const guardName = checkin.agent_id 
+    ? `Agent ${checkin.agent_id.slice(-4)}` 
+    : "Guard #" + Math.floor(Math.random() * 9000 + 1000);
+  
+  // In a real app, we would derive the site from the data
   const siteName = ["Downtown Office", "Westside Mall", "Corporate HQ", "Riverside Apartments"][
     Math.floor(Math.random() * 4)
   ];
@@ -63,13 +81,11 @@ const CheckInRow = ({ checkin }: CheckInRowProps) => {
         <TableCell>
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            {checkin.start_timestamp 
-              ? formatDistanceToNow(new Date(checkin.start_timestamp * 1000), { addSuffix: true })
-              : "Unknown"}
+            {formatTimestamp(checkin.start_timestamp)}
           </div>
         </TableCell>
         <TableCell>{formatDuration(checkin.duration_ms)}</TableCell>
-        <TableCell>{getStatusBadge(checkin.call_status || "completed")}</TableCell>
+        <TableCell>{getStatusBadge(checkin.call_status)}</TableCell>
         <TableCell className="text-right">
           <div className="flex justify-end gap-2">
             {checkin.transcript && (

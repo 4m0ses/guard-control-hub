@@ -33,4 +33,5 @@ export interface CheckInFilters {
   fromDate?: string;
   toDate?: string;
   search?: string;
+  debug?: string;
 }
