@@ -67,9 +67,21 @@ export function EditCompanyForm({ isOpen, onClose, company, onSuccess }: EditCom
     console.log(`Updating company ${company.id} with data:`, data);
 
     try {
+      // Cast the data to ensure all required fields are present
+      const companyData = {
+        name: data.name,
+        address: data.address,
+        company_number: data.company_number,
+        contact_first_name: data.contact_first_name,
+        contact_last_name: data.contact_last_name,
+        contact_position: data.contact_position,
+        contact_phone: data.contact_phone,
+        contact_email: data.contact_email,
+      };
+      
       const { error } = await supabase
         .from('companies')
-        .update(data)
+        .update(companyData)
         .eq('id', company.id);
 
       if (error) {
