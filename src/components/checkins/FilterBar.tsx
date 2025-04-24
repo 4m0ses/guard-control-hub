@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Search, Calendar, ChevronDown, Download } from "lucide-react";
+import { Search, Calendar, ChevronDown, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -33,13 +33,21 @@ const FilterBar = ({ onFilterChange, onExport }: FilterBarProps) => {
   useEffect(() => {
     const filters = {
       search: searchTerm,
-      status: status === "all" ? "" : status,
-      siteId: siteId === "all" ? "" : siteId,
+      status: status,
+      siteId: siteId,
       fromDate: fromDate ? format(fromDate, "yyyy-MM-dd") : "",
       toDate: toDate ? format(toDate, "yyyy-MM-dd") : "",
     };
     onFilterChange(filters);
   }, [searchTerm, status, siteId, fromDate, toDate, onFilterChange]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setStatus("all");
+    setSiteId("all");
+    setFromDate(undefined);
+    setToDate(undefined);
+  };
   
   return (
     <Card className="p-4">
@@ -55,6 +63,14 @@ const FilterBar = ({ onFilterChange, onExport }: FilterBarProps) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {searchTerm && (
+              <button 
+                onClick={() => setSearchTerm("")}
+                className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
         
@@ -100,7 +116,16 @@ const FilterBar = ({ onFilterChange, onExport }: FilterBarProps) => {
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 {fromDate ? format(fromDate, "PPP") : "Pick a date"}
-                <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
+                {fromDate && (
+                  <X 
+                    className="ml-auto h-4 w-4 opacity-50 hover:opacity-100" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFromDate(undefined);
+                    }}
+                  />
+                )}
+                {!fromDate && <ChevronDown className="ml-auto h-4 w-4 opacity-50" />}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -124,7 +149,16 @@ const FilterBar = ({ onFilterChange, onExport }: FilterBarProps) => {
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 {toDate ? format(toDate, "PPP") : "Pick a date"}
-                <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
+                {toDate && (
+                  <X 
+                    className="ml-auto h-4 w-4 opacity-50 hover:opacity-100" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setToDate(undefined);
+                    }}
+                  />
+                )}
+                {!toDate && <ChevronDown className="ml-auto h-4 w-4 opacity-50" />}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
@@ -139,11 +173,19 @@ const FilterBar = ({ onFilterChange, onExport }: FilterBarProps) => {
         </div>
         
         <Button 
-          className="w-full md:w-auto mt-4 md:mt-0" 
+          className="mt-2 md:mt-0" 
           variant="outline"
           onClick={onExport}
         >
           <Download className="mr-2 h-4 w-4" /> Export CSV
+        </Button>
+        
+        <Button 
+          className="mt-2 md:mt-0" 
+          variant="ghost"
+          onClick={clearFilters}
+        >
+          <X className="mr-2 h-4 w-4" /> Clear Filters
         </Button>
       </div>
     </Card>
