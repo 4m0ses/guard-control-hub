@@ -1,38 +1,39 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export type Severity = 'low' | 'medium' | 'high' | 'critical';
-export type IncidentStatus = 'reported' | 'investigating' | 'resolved' | 'closed';
+export type Severity = 'low' | 'medium' | 'high';
+export type IncidentStatus = 'open' | 'resolved';
 
 export interface CreateIncidentDTO {
   siteId: string;
   title: string;
-  location: string;
+  locationDesc: string;
   severity: Severity;
   description: string;
-  attachmentUrls?: string[];
+  attachments?: string[];
 }
 
 export interface IncidentVersion {
   id: string;
-  incident_id: string;
-  created_by_user_id: string;
+  incident_report_id: string;
+  edited_by_id: string;
+  edited_at: string;
   description: string;
-  status: IncidentStatus;
-  attachment_urls: string[] | null;
+  attachments: string[] | null;
   created_at: string;
 }
 
 export interface Incident {
   id: string;
-  title: string;
-  location: string;
-  severity: Severity;
+  guard_id: string;
   site_id: string;
-  reported_by_user_id: string;
-  current_version_id: string | null;
+  submitted_at: string;
+  severity: Severity;
+  location_desc: string;
+  status: IncidentStatus;
+  current_version: string | null;
+  raw_payload: any | null;
   created_at: string;
-  updated_at: string;
   currentVersion?: IncidentVersion;
   versions?: IncidentVersion[];
 }
@@ -45,10 +46,10 @@ export const incidentService = {
         .from('incident_reports')
         .insert({
           site_id: data.siteId,
-          title: data.title,
-          location: data.location,
-          severity: data.severity as Severity,
-          reported_by_user_id: (await supabase.auth.getUser()).data.user?.id,
+          guard_id: (await supabase.auth.getUser()).data.user?.id,
+          severity: data.severity,
+          location_desc: data.locationDesc,
+          status: 'open' as IncidentStatus,
         })
         .select()
         .single();
@@ -59,11 +60,10 @@ export const incidentService = {
       const { data: version, error: versionError } = await supabase
         .from('incident_versions')
         .insert({
-          incident_id: incident.id,
+          incident_report_id: incident.id,
           description: data.description,
-          status: 'reported' as IncidentStatus,
-          attachment_urls: data.attachmentUrls,
-          created_by_user_id: (await supabase.auth.getUser()).data.user?.id,
+          attachments: data.attachments,
+          edited_by_id: (await supabase.auth.getUser()).data.user?.id,
         })
         .select()
         .single();
@@ -73,11 +73,11 @@ export const incidentService = {
       // Update the incident with the current version
       const { data: updatedIncident, error: updateError } = await supabase
         .from('incident_reports')
-        .update({ current_version_id: version.id })
+        .update({ current_version: version.id })
         .eq('id', incident.id)
         .select(`
           *,
-          currentVersion:incident_versions!incident_reports_current_version_id_fkey(*)
+          currentVersion:incident_versions!incident_reports_current_version_fkey(*)
         `)
         .single();
 
@@ -91,33 +91,32 @@ export const incidentService = {
   },
 
   async updateIncident(
-    incidentId: string, 
-    description: string, 
+    incidentId: string,
+    description: string,
     status: IncidentStatus,
-    attachmentUrls?: string[]
+    attachments?: string[]
   ): Promise<boolean> {
     try {
       // Create new version
       const { data: version, error: versionError } = await supabase
         .from('incident_versions')
         .insert({
-          incident_id: incidentId,
+          incident_report_id: incidentId,
           description,
-          status,
-          attachment_urls: attachmentUrls,
-          created_by_user_id: (await supabase.auth.getUser()).data.user?.id,
+          attachments,
+          edited_by_id: (await supabase.auth.getUser()).data.user?.id,
         })
         .select()
         .single();
 
       if (versionError) throw versionError;
 
-      // Update current version reference
+      // Update current version reference and status
       const { error: updateError } = await supabase
         .from('incident_reports')
-        .update({ 
-          current_version_id: version.id,
-          updated_at: new Date().toISOString()
+        .update({
+          current_version: version.id,
+          status
         })
         .eq('id', incidentId);
 
@@ -136,7 +135,7 @@ export const incidentService = {
         .from('incident_reports')
         .select(`
           *,
-          currentVersion:incident_versions!incident_reports_current_version_id_fkey(*),
+          currentVersion:incident_versions!incident_reports_current_version_fkey(*),
           versions:incident_versions(*)
         `)
         .eq('id', id)
@@ -156,7 +155,7 @@ export const incidentService = {
         .from('incident_reports')
         .select(`
           *,
-          currentVersion:incident_versions!incident_reports_current_version_id_fkey(*)
+          currentVersion:incident_versions!incident_reports_current_version_fkey(*)
         `)
         .order('created_at', { ascending: false });
 
