@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -79,6 +80,7 @@ export function EditCompanyForm({ isOpen, onClose, company, onSuccess }: EditCom
         contact_email: data.contact_email,
       };
       
+      console.log("Sending update with ID:", company.id);
       const { error } = await supabase
         .from('companies')
         .update(companyData)
@@ -88,6 +90,7 @@ export function EditCompanyForm({ isOpen, onClose, company, onSuccess }: EditCom
         console.error("Error updating company:", error);
         toast.error(`Failed to update company: ${error.message}`);
       } else {
+        console.log("Company updated successfully");
         toast.success("Company updated successfully");
         onSuccess();
         onClose();
@@ -105,6 +108,9 @@ export function EditCompanyForm({ isOpen, onClose, company, onSuccess }: EditCom
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Edit Company</DialogTitle>
+          <DialogDescription>
+            Make changes to the company information below.
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

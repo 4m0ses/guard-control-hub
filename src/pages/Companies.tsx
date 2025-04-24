@@ -38,13 +38,7 @@ const Companies = () => {
     },
   })
 
-  useEffect(() => {
-    console.log("Companies component mounted or companies data updated")
-    return () => {
-      console.log("Companies component unmounted")
-    }
-  }, [companies])
-
+  // Force refetch when component mounts
   useEffect(() => {
     refetch();
   }, [refetch]);
@@ -57,6 +51,11 @@ const Companies = () => {
   const handleDeleteClick = (company) => {
     setSelectedCompany(company);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleOperationSuccess = () => {
+    // Force a refetch to get the updated data
+    refetch();
   };
 
   const filteredCompanies = companies.filter(company => 
@@ -190,7 +189,7 @@ const Companies = () => {
         <CreateCompanyForm 
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={() => refetch()}
+          onSuccess={handleOperationSuccess}
         />
 
         {selectedCompany && (
@@ -199,7 +198,7 @@ const Companies = () => {
               isOpen={isEditModalOpen}
               onClose={() => setIsEditModalOpen(false)}
               company={selectedCompany}
-              onSuccess={() => refetch()}
+              onSuccess={handleOperationSuccess}
             />
 
             <DeleteCompanyDialog
@@ -207,7 +206,7 @@ const Companies = () => {
               onClose={() => setIsDeleteDialogOpen(false)}
               companyId={selectedCompany.id}
               companyName={selectedCompany.name}
-              onSuccess={() => refetch()}
+              onSuccess={handleOperationSuccess}
             />
           </>
         )}

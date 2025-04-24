@@ -31,12 +31,17 @@ export function DeleteCompanyDialog({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!companyId) return;
+    if (!companyId) {
+      toast.error("Missing company ID");
+      onClose();
+      return;
+    }
     
     setIsDeleting(true);
     console.log(`Deleting company with ID: ${companyId}`);
     
     try {
+      // Make sure we're using the exact ID format that Supabase expects
       const { error } = await supabase
         .from('companies')
         .delete()
@@ -46,6 +51,7 @@ export function DeleteCompanyDialog({
         console.error("Error deleting company:", error);
         toast.error(`Failed to delete company: ${error.message}`);
       } else {
+        console.log("Company deleted successfully");
         toast.success("Company deleted successfully");
         onSuccess();
       }
@@ -71,7 +77,10 @@ export function DeleteCompanyDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
           <AlertDialogAction 
-            onClick={handleDelete}
+            onClick={(e) => {
+              e.preventDefault();
+              handleDelete();
+            }}
             disabled={isDeleting}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
