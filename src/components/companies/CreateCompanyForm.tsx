@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
-import { CompanyFormValues, companySchema } from "@/lib/schemas/companySchema";
+import { CompanyFormValues, companyFormSchema } from "@/lib/schemas/companySchema";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -27,7 +27,7 @@ export function CreateCompanyForm({ isOpen, onClose, onSuccess }: CreateCompanyF
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CompanyFormValues>({
-    resolver: zodResolver(companySchema),
+    resolver: zodResolver(companyFormSchema),
     defaultValues: {
       name: "",
       address: "",
