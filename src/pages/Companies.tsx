@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -16,7 +17,7 @@ const Companies = () => {
   const { data: companies = [], isLoading, error, refetch } = useQuery({
     queryKey: ['companies'],
     queryFn: async () => {
-      console.log("Fetching companies with anon key:", supabase.auth.anon)
+      console.log("Fetching companies...")
       const { data, error } = await supabase
         .from('companies')
         .select('*')
@@ -45,7 +46,8 @@ const Companies = () => {
 
   const filteredCompanies = companies.filter(company => 
     company.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    `${company.contact_first_name} ${company.contact_last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
+    `${company.contact_first_name} ${company.contact_last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    company.company_number.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (error) {
