@@ -41,12 +41,20 @@ export function CreateCompanyForm({ isOpen, onClose }: CreateCompanyFormProps) {
   async function onSubmit(data: CompanyFormValues) {
     try {
       setIsSubmitting(true)
-      const { error } = await supabase
+      console.log("Form data being submitted:", data)
+      
+      const { data: insertedData, error } = await supabase
         .from('companies')
         .insert(data as CompanyInsert)
+        .select() // Add select to return the inserted data
 
-      if (error) throw error
+      if (error) {
+        console.error('Error creating company:', error)
+        toast.error(`Failed to create company: ${error.message}`)
+        throw error
+      }
 
+      console.log("Inserted company data:", insertedData)
       toast.success("Company created successfully")
       queryClient.invalidateQueries({ queryKey: ['companies'] })
       form.reset()
