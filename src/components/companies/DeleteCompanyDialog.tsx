@@ -41,7 +41,6 @@ export function DeleteCompanyDialog({
     console.log(`Deleting company with ID: ${companyId}`);
     
     try {
-      // Remove the .select('count') which was causing the error
       const { error } = await supabase
         .from('companies')
         .delete()
@@ -53,7 +52,11 @@ export function DeleteCompanyDialog({
       } else {
         console.log("Company deleted successfully");
         toast.success("Company deleted successfully");
-        onSuccess(); // This will trigger a refetch of the company list
+        
+        // First call onSuccess (to trigger refetch) and then call onClose
+        if (typeof onSuccess === 'function') {
+          onSuccess();
+        }
       }
     } catch (error: any) {
       console.error("Exception deleting company:", error);

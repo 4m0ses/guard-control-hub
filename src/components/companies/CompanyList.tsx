@@ -69,6 +69,7 @@ export function CompanyList({
           }}
           onDelete={() => {
             console.log("Delete company with ID:", company.id);
+            console.log("Delete clicked for company:", company);
             onDelete(company);
           }}
         />

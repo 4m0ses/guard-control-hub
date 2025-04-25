@@ -8,6 +8,7 @@ import { Plus, AlertTriangle } from "lucide-react";
 import { formatDistance } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { incidentService, type Incident } from "@/services/incidentService";
+import { toast } from "sonner";
 
 const severityColors = {
   low: "bg-blue-100 text-blue-800",
@@ -22,9 +23,13 @@ const statusColors = {
 
 const Incidents = () => {
   const navigate = useNavigate();
-  const { data: incidents, isLoading } = useQuery({
+  const { data: incidents, isLoading, error } = useQuery({
     queryKey: ['incidents'],
-    queryFn: incidentService.getIncidents
+    queryFn: incidentService.getIncidents,
+    onError: (err: any) => {
+      console.error('Error fetching incidents:', err);
+      toast.error(`Failed to load incidents: ${err.message || 'Unknown error'}`);
+    }
   });
 
   return (
@@ -39,6 +44,19 @@ const Incidents = () => {
 
         {isLoading ? (
           <div className="text-center py-4">Loading incidents...</div>
+        ) : error ? (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-red-500">Error loading incidents.</p>
+              <Button 
+                onClick={() => navigate(0)}  
+                variant="outline" 
+                className="mt-2"
+              >
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
         ) : incidents?.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center">
