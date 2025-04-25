@@ -32,8 +32,6 @@ export function DeleteCompanyDialog({
 
   const handleDelete = async () => {
     console.log("Attempting to delete company with ID:", companyId);
-    console.log("Company name:", companyName);
-    console.log("companyId type:", typeof companyId);
     
     if (!companyId) {
       toast.error("Missing company ID");
@@ -44,18 +42,15 @@ export function DeleteCompanyDialog({
     setIsDeleting(true);
     
     try {
-      // First, delete the company
-      const { error: deleteError, count } = await supabase
+      // Delete the company without using aggregate functions in RETURNING
+      const { error } = await supabase
         .from('companies')
         .delete()
-        .eq('id', companyId)
-        .select('count');
+        .eq('id', companyId);
       
-      console.log("Delete response:", { deleteError, count });
-      
-      if (deleteError) {
-        console.error("Error deleting company:", deleteError);
-        toast.error(`Failed to delete company: ${deleteError.message}`);
+      if (error) {
+        console.error("Error deleting company:", error);
+        toast.error(`Failed to delete company: ${error.message}`);
       } else {
         console.log("Company deleted successfully");
         toast.success(`Company "${companyName}" deleted successfully`);
