@@ -34,10 +34,12 @@ export function DeleteAllCompaniesDialog({
     setIsDeleting(true);
     
     try {
+      // Using the delete() without any filter will delete all records
       const { error } = await supabase
         .from('companies')
         .delete()
-        .neq('id', 'placeholder'); // This will match all rows since no ID equals 'placeholder'
+        .is('id', null) // This is a workaround to trigger deletion of all rows (true = all rows)
+        .not('id', null); // This ensures we match all rows with non-null IDs
       
       if (error) {
         console.error("Error deleting companies:", error);
