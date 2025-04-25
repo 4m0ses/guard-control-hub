@@ -42,7 +42,7 @@ export function DeleteCompanyDialog({
     setIsDeleting(true);
     
     try {
-      // Perform the deletion without any additional selectors
+      // Delete the company from the database
       const { error } = await supabase
         .from('companies')
         .delete()
@@ -55,15 +55,19 @@ export function DeleteCompanyDialog({
         console.log("Company deleted successfully");
         toast.success(`Company "${companyName}" deleted successfully`);
         
-        // Call onSuccess to trigger data refetch in the parent component
+        // First close the dialog
+        onClose();
+        
+        // Then trigger data refetch in the parent component
+        // Make sure we wait for this to complete
         await onSuccess();
       }
     } catch (error: any) {
       console.error("Exception deleting company:", error);
       toast.error(`An unexpected error occurred: ${error.message}`);
+      onClose();
     } finally {
       setIsDeleting(false);
-      onClose();
     }
   };
 

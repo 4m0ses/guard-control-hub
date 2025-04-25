@@ -24,6 +24,8 @@ const Companies = () => {
     queryKey: ['companies'],
     queryFn: async () => {
       console.log("Fetching companies...");
+      
+      // Clear the cache before fetching to ensure we get fresh data
       const { data, error } = await supabase
         .from('companies')
         .select('*')
@@ -38,6 +40,10 @@ const Companies = () => {
       console.log("Successfully fetched companies:", data);
       return data || [];
     },
+    // Disable caching for this query to always fetch fresh data
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   const handleEditClick = (company) => {
@@ -56,7 +62,7 @@ const Companies = () => {
   const handleOperationSuccess = async () => {
     console.log("Operation successful, refetching companies...");
     try {
-      // Force cache invalidation and refetch
+      // Force invalidation and refetch to get the most up-to-date data
       await refetch();
       console.log("Companies data refetched successfully");
     } catch (err) {
