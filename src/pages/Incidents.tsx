@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -26,9 +25,14 @@ const Incidents = () => {
   const { data: incidents, isLoading, error } = useQuery({
     queryKey: ['incidents'],
     queryFn: incidentService.getIncidents,
-    onError: (err: any) => {
-      console.error('Error fetching incidents:', err);
-      toast.error(`Failed to load incidents: ${err.message || 'Unknown error'}`);
+    onSuccess: (data) => {
+      console.log('Incidents loaded successfully:', data?.length);
+    },
+    onSettled: (data, error) => {
+      if (error) {
+        console.error('Error fetching incidents:', error);
+        toast.error(`Failed to load incidents: ${(error as Error).message || 'Unknown error'}`);
+      }
     }
   });
 
