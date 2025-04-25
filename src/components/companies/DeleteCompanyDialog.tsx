@@ -41,21 +41,29 @@ export function DeleteCompanyDialog({
     console.log(`Deleting company with ID: ${companyId}`);
     
     try {
-      const { error } = await supabase
+      // Make sure we're using the right table name and properly awaiting the response
+      const { error, count } = await supabase
         .from('companies')
         .delete()
-        .eq('id', companyId);
+        .eq('id', companyId)
+        .select('count');
 
       if (error) {
         console.error("Error deleting company:", error);
         toast.error(`Failed to delete company: ${error.message}`);
       } else {
-        console.log("Company deleted successfully");
-        toast.success("Company deleted successfully");
-        
-        // First call onSuccess (to trigger refetch) and then call onClose
-        if (typeof onSuccess === 'function') {
-          onSuccess();
+        // Check if any rows were actually deleted
+        if (count === 0) {
+          console.error("No company was deleted. ID may not exist:", companyId);
+          toast.error("Failed to delete company: Record not found");
+        } else {
+          console.log("Company deleted successfully");
+          toast.success("Company deleted successfully");
+          
+          // First call onSuccess (to trigger refetch) and then call onClose
+          if (typeof onSuccess === 'function') {
+            onSuccess();
+          }
         }
       }
     } catch (error: any) {
