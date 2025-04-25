@@ -46,16 +46,13 @@ const Companies = () => {
 
   const handleEditClick = (company) => {
     console.log("Edit clicked for company:", company);
-    console.log("Company ID:", company.id);
-    console.log("Company ID type:", typeof company.id);
     setSelectedCompany(company);
     setIsEditModalOpen(true);
   };
 
   const handleDeleteClick = (company) => {
-    console.log("Delete clicked for company:", company);
-    console.log("Delete company with ID:", company.id);
-    console.log("Delete clicked for company:", company);
+    console.log("Delete clicked for company with ID:", company.id);
+    console.log("Delete clicked for company object:", company);
     setSelectedCompany(company);
     setIsDeleteDialogOpen(true);
   };
@@ -63,7 +60,6 @@ const Companies = () => {
   const handleOperationSuccess = () => {
     console.log("Operation successful, refetching companies...");
     setRefreshTrigger(prev => prev + 1); // Change the key to force refetch
-    refetch();
   };
 
   const filteredCompanies = companies.filter(company => 

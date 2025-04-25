@@ -44,37 +44,22 @@ export function DeleteCompanyDialog({
     setIsDeleting(true);
     
     try {
-      // Check if the company exists first
-      const { data: checkData, error: checkError } = await supabase
-        .from('companies')
-        .select('id')
-        .eq('id', companyId)
-        .single();
-      
-      console.log("Company check result:", { checkData, checkError });
-      
-      if (checkError) {
-        console.error("Error checking company existence:", checkError);
-        toast.error(`Company not found: ${checkError.message}`);
-        setIsDeleting(false);
-        onClose();
-        return;
-      }
-      
-      // Perform the delete operation
-      // NOTE: We're not using .select() here as it might be causing the empty array response
-      const { error } = await supabase
+      // First, delete the company
+      const { error: deleteError, count } = await supabase
         .from('companies')
         .delete()
-        .eq('id', companyId);
+        .eq('id', companyId)
+        .select('count');
       
-      if (error) {
-        console.error("Error deleting company:", error);
-        toast.error(`Failed to delete company: ${error.message}`);
+      console.log("Delete response:", { deleteError, count });
+      
+      if (deleteError) {
+        console.error("Error deleting company:", deleteError);
+        toast.error(`Failed to delete company: ${deleteError.message}`);
       } else {
         console.log("Company deleted successfully");
-        toast.success("Company deleted successfully");
-        // Ensure the onSuccess callback is called to refresh the companies list
+        toast.success(`Company "${companyName}" deleted successfully`);
+        // Call onSuccess to refresh the companies list
         onSuccess();
       }
     } catch (error: any) {

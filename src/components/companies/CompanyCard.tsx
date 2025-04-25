@@ -26,6 +26,8 @@ export function CompanyCard({ company, onEdit, onDelete }: CompanyCardProps) {
   
   const handleDelete = () => {
     console.log("Delete button clicked for company:", company.id);
+    console.log("Delete function available:", !!onDelete);
+    console.log("Company object being passed:", company);
     onDelete(company);
   };
 
@@ -48,6 +50,7 @@ export function CompanyCard({ company, onEdit, onDelete }: CompanyCardProps) {
               size="icon"
               onClick={handleDelete}
               title="Delete company"
+              className="text-red-500 hover:bg-red-100 hover:text-red-700"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
