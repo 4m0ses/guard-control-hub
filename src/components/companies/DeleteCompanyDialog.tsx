@@ -44,7 +44,7 @@ export function DeleteCompanyDialog({
     setIsDeleting(true);
     
     try {
-      // Perform the delete operation and log full response
+      // Perform the delete operation with proper error handling
       const { data, error } = await supabase
         .from('companies')
         .delete()
@@ -58,11 +58,7 @@ export function DeleteCompanyDialog({
       } else {
         console.log("Company deleted successfully");
         toast.success("Company deleted successfully");
-        
-        // First call onSuccess (to trigger refetch) and then call onClose
-        if (typeof onSuccess === 'function') {
-          onSuccess();
-        }
+        onSuccess(); // Call onSuccess to trigger refetch
       }
     } catch (error: any) {
       console.error("Exception deleting company:", error);

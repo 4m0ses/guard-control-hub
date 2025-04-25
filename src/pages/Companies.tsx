@@ -44,16 +44,16 @@ const Companies = () => {
 
   const handleEditClick = (company) => {
     console.log("Edit clicked for company:", company);
+    console.log("Company ID:", company.id);
+    console.log("Company ID type:", typeof company.id);
     setSelectedCompany(company);
     setIsEditModalOpen(true);
   };
 
   const handleDeleteClick = (company) => {
     console.log("Delete clicked for company:", company);
-    console.log("Company details:", {
-      id: company.id,
-      name: company.name
-    });
+    console.log("Company ID:", company.id);
+    console.log("Company ID type:", typeof company.id);
     setSelectedCompany(company);
     setIsDeleteDialogOpen(true);
   };
@@ -66,7 +66,7 @@ const Companies = () => {
   const filteredCompanies = companies.filter(company => 
     company.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     `${company.contact_first_name} ${company.contact_last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.company_number.toLowerCase().includes(searchTerm.toLowerCase())
+    (company.company_number && company.company_number.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (

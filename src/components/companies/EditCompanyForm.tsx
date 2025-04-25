@@ -45,6 +45,7 @@ export function EditCompanyForm({ isOpen, onClose, company, onSuccess }: EditCom
   // Update form values when company data changes
   useEffect(() => {
     if (company) {
+      console.log("Setting form values with company data:", company);
       form.reset({
         name: company.name || "",
         address: company.address || "",
@@ -64,6 +65,9 @@ export function EditCompanyForm({ isOpen, onClose, company, onSuccess }: EditCom
       return;
     }
 
+    console.log("Updating company with ID:", company.id);
+    console.log("Company ID type:", typeof company.id);
+    
     setIsSubmitting(true);
     console.log(`Updating company ${company.id} with data:`, data);
 
@@ -81,11 +85,13 @@ export function EditCompanyForm({ isOpen, onClose, company, onSuccess }: EditCom
       };
       
       console.log("Sending update with ID:", company.id);
-      const { error } = await supabase
+      const { data: responseData, error } = await supabase
         .from('companies')
         .update(companyData)
         .eq('id', company.id);
 
+      console.log("Update response:", { responseData, error });
+      
       if (error) {
         console.error("Error updating company:", error);
         toast.error(`Failed to update company: ${error.message}`);
@@ -95,9 +101,9 @@ export function EditCompanyForm({ isOpen, onClose, company, onSuccess }: EditCom
         onSuccess();
         onClose();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Exception updating company:", error);
-      toast.error("An unexpected error occurred");
+      toast.error(`An unexpected error occurred: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }

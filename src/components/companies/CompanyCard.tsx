@@ -19,6 +19,16 @@ interface CompanyCardProps {
 }
 
 export function CompanyCard({ company, onEdit, onDelete }: CompanyCardProps) {
+  const handleEdit = () => {
+    console.log("Edit button clicked for company:", company.id);
+    onEdit(company);
+  };
+  
+  const handleDelete = () => {
+    console.log("Delete button clicked for company:", company.id);
+    onDelete(company);
+  };
+
   return (
     <Card key={company.id} className="overflow-hidden">
       <CardHeader className="bg-muted p-4">
@@ -28,7 +38,7 @@ export function CompanyCard({ company, onEdit, onDelete }: CompanyCardProps) {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => onEdit(company)}
+              onClick={handleEdit}
               title="Edit company"
             >
               <Edit className="h-4 w-4" />
@@ -36,7 +46,7 @@ export function CompanyCard({ company, onEdit, onDelete }: CompanyCardProps) {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => onDelete(company)}
+              onClick={handleDelete}
               title="Delete company"
             >
               <Trash2 className="h-4 w-4" />
