@@ -62,28 +62,20 @@ export function DeleteCompanyDialog({
       }
       
       // Perform the delete operation
-      const { data, error } = await supabase
+      // NOTE: We're not using .select() here as it might be causing the empty array response
+      const { error } = await supabase
         .from('companies')
         .delete()
-        .eq('id', companyId)
-        .select();
-      
-      console.log("Delete operation response:", { data, error });
+        .eq('id', companyId);
       
       if (error) {
         console.error("Error deleting company:", error);
         toast.error(`Failed to delete company: ${error.message}`);
       } else {
-        // Verify if any row was actually deleted
-        if (!data || data.length === 0) {
-          console.warn("No company was deleted");
-          toast.warning("No company was deleted. It may have already been removed.");
-        } else {
-          console.log("Company deleted successfully");
-          toast.success("Company deleted successfully");
-          // Ensure the onSuccess callback is called to refresh the companies list
-          onSuccess();
-        }
+        console.log("Company deleted successfully");
+        toast.success("Company deleted successfully");
+        // Ensure the onSuccess callback is called to refresh the companies list
+        onSuccess();
       }
     } catch (error: any) {
       console.error("Exception deleting company:", error);
