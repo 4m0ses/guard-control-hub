@@ -41,29 +41,45 @@ export function DeleteCompanyDialog({
     console.log(`Deleting company with ID: ${companyId}`);
     
     try {
-      // Make sure we're using the right table name and properly awaiting the response
-      const { error, count } = await supabase
+      // First check if the company exists
+      const { data: checkData, error: checkError } = await supabase
+        .from('companies')
+        .select()
+        .eq('id', companyId)
+        .maybeSingle();
+      
+      if (checkError) {
+        console.error("Error checking company:", checkError);
+        toast.error(`Failed to delete company: ${checkError.message}`);
+        setIsDeleting(false);
+        onClose();
+        return;
+      }
+      
+      if (!checkData) {
+        console.error("Company not found:", companyId);
+        toast.error("Failed to delete company: Record not found");
+        setIsDeleting(false);
+        onClose();
+        return;
+      }
+      
+      // Now perform the delete operation
+      const { error: deleteError } = await supabase
         .from('companies')
         .delete()
-        .eq('id', companyId)
-        .select('count');
+        .eq('id', companyId);
 
-      if (error) {
-        console.error("Error deleting company:", error);
-        toast.error(`Failed to delete company: ${error.message}`);
+      if (deleteError) {
+        console.error("Error deleting company:", deleteError);
+        toast.error(`Failed to delete company: ${deleteError.message}`);
       } else {
-        // Check if any rows were actually deleted
-        if (count === 0) {
-          console.error("No company was deleted. ID may not exist:", companyId);
-          toast.error("Failed to delete company: Record not found");
-        } else {
-          console.log("Company deleted successfully");
-          toast.success("Company deleted successfully");
-          
-          // First call onSuccess (to trigger refetch) and then call onClose
-          if (typeof onSuccess === 'function') {
-            onSuccess();
-          }
+        console.log("Company deleted successfully");
+        toast.success("Company deleted successfully");
+        
+        // First call onSuccess (to trigger refetch) and then call onClose
+        if (typeof onSuccess === 'function') {
+          onSuccess();
         }
       }
     } catch (error: any) {
