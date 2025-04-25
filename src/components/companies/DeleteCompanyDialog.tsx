@@ -41,18 +41,17 @@ export function DeleteCompanyDialog({
     console.log(`Deleting company with ID: ${companyId}`);
     
     try {
-      // Make sure we're using the exact ID format that Supabase expects
-      const { error, count } = await supabase
+      // Remove the .select('count') which was causing the error
+      const { error } = await supabase
         .from('companies')
         .delete()
-        .eq('id', companyId)
-        .select('count');
+        .eq('id', companyId);
 
       if (error) {
         console.error("Error deleting company:", error);
         toast.error(`Failed to delete company: ${error.message}`);
       } else {
-        console.log(`Company deleted successfully. Rows affected: ${count}`);
+        console.log("Company deleted successfully");
         toast.success("Company deleted successfully");
         onSuccess(); // This will trigger a refetch of the company list
       }
