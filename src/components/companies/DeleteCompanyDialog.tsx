@@ -33,6 +33,7 @@ export function DeleteCompanyDialog({
   const handleDelete = async () => {
     console.log("Attempting to delete company with ID:", companyId);
     console.log("Company name:", companyName);
+    console.log("companyId type:", typeof companyId);
     
     if (!companyId) {
       toast.error("Missing company ID");
@@ -41,14 +42,15 @@ export function DeleteCompanyDialog({
     }
     
     setIsDeleting(true);
-    console.log(`Deleting company with ID: ${companyId}`);
     
     try {
-      // Perform the delete operation
-      const { error } = await supabase
+      // Perform the delete operation and log full response
+      const { data, error } = await supabase
         .from('companies')
         .delete()
         .eq('id', companyId);
+      
+      console.log("Delete operation response:", { data, error });
       
       if (error) {
         console.error("Error deleting company:", error);
