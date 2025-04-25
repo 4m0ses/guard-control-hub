@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+
+import { useState } from "react";
+import { useQuery, QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

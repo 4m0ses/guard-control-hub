@@ -45,8 +45,7 @@ export function DeleteCompanyDialog({
       const { error } = await supabase
         .from('companies')
         .delete()
-        .eq('id', companyId)
-        .maybeSingle();
+        .eq('id', companyId);
       
       if (error) {
         console.error("Error deleting company:", error);
@@ -54,6 +53,7 @@ export function DeleteCompanyDialog({
       } else {
         console.log("Company deleted successfully");
         toast.success(`Company "${companyName}" deleted successfully`);
+        // Ensure we call onSuccess after successful deletion
         onSuccess();
       }
     } catch (error: any) {
