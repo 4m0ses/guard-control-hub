@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -22,16 +23,19 @@ const statusColors = {
 
 const Incidents = () => {
   const navigate = useNavigate();
+  
+  // Fixed the useQuery hook to use the proper API for the current version
   const { data: incidents, isLoading, error } = useQuery({
     queryKey: ['incidents'],
     queryFn: incidentService.getIncidents,
-    onSuccess: (data) => {
-      console.log('Incidents loaded successfully:', data?.length);
-    },
-    onSettled: (data, error) => {
-      if (error) {
+    // Using meta for callbacks that are no longer at the root level
+    meta: {
+      onSuccess: (data: Incident[]) => {
+        console.log('Incidents loaded successfully:', data?.length);
+      },
+      onError: (error: Error) => {
         console.error('Error fetching incidents:', error);
-        toast.error(`Failed to load incidents: ${(error as Error).message || 'Unknown error'}`);
+        toast.error(`Failed to load incidents: ${error.message || 'Unknown error'}`);
       }
     }
   });
