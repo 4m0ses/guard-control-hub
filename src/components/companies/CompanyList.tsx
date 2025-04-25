@@ -63,8 +63,14 @@ export function CompanyList({
         <CompanyCard
           key={company.id}
           company={company}
-          onEdit={onEdit}
-          onDelete={onDelete}
+          onEdit={() => {
+            console.log("Edit company with ID:", company.id);
+            onEdit(company);
+          }}
+          onDelete={() => {
+            console.log("Delete company with ID:", company.id);
+            onDelete(company);
+          }}
         />
       ))}
     </div>

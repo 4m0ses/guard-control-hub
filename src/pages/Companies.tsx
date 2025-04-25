@@ -43,16 +43,19 @@ const Companies = () => {
   }, [refetch]);
 
   const handleEditClick = (company) => {
+    console.log("Edit clicked for company:", company);
     setSelectedCompany(company);
     setIsEditModalOpen(true);
   };
 
   const handleDeleteClick = (company) => {
+    console.log("Delete clicked for company:", company);
     setSelectedCompany(company);
     setIsDeleteDialogOpen(true);
   };
 
   const handleOperationSuccess = () => {
+    console.log("Operation successful, refetching companies...");
     refetch();
   };
 
