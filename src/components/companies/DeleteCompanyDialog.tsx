@@ -1,4 +1,3 @@
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +30,9 @@ export function DeleteCompanyDialog({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
+    console.log("Attempting to delete company with ID:", companyId);
+    console.log("Company name:", companyName);
+    
     if (!companyId) {
       toast.error("Missing company ID");
       onClose();

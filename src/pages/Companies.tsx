@@ -50,6 +50,10 @@ const Companies = () => {
 
   const handleDeleteClick = (company) => {
     console.log("Delete clicked for company:", company);
+    console.log("Company details:", {
+      id: company.id,
+      name: company.name
+    });
     setSelectedCompany(company);
     setIsDeleteDialogOpen(true);
   };
