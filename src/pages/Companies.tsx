@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useQuery, QueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,23 +19,24 @@ const Companies = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
 
+  // Query to fetch companies
   const { data: companies = [], isLoading, error, refetch } = useQuery({
     queryKey: ['companies'],
     queryFn: async () => {
-      console.log("Fetching companies...")
+      console.log("Fetching companies...");
       const { data, error } = await supabase
         .from('companies')
         .select('*')
-        .order('name')
+        .order('name');
       
       if (error) {
-        console.error('Error fetching companies:', error)
-        toast.error(`Error loading companies: ${error.message}`)
-        throw error
+        console.error('Error fetching companies:', error);
+        toast.error(`Error loading companies: ${error.message}`);
+        throw error;
       }
       
-      console.log("Successfully fetched companies:", data)
-      return data || []
+      console.log("Successfully fetched companies:", data);
+      return data || [];
     },
   });
 
@@ -51,9 +52,17 @@ const Companies = () => {
     setIsDeleteDialogOpen(true);
   };
 
+  // Made this function async to properly handle refetching
   const handleOperationSuccess = async () => {
     console.log("Operation successful, refetching companies...");
-    await refetch();
+    try {
+      // Force cache invalidation and refetch
+      await refetch();
+      console.log("Companies data refetched successfully");
+    } catch (err) {
+      console.error("Error refetching companies:", err);
+      toast.error("Failed to refresh companies list");
+    }
   };
 
   const filteredCompanies = companies.filter(company => 
