@@ -1,3 +1,4 @@
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,38 +44,15 @@ export function DeleteCompanyDialog({
     console.log(`Deleting company with ID: ${companyId}`);
     
     try {
-      // First check if the company exists
-      const { data: checkData, error: checkError } = await supabase
-        .from('companies')
-        .select()
-        .eq('id', companyId)
-        .maybeSingle();
-      
-      if (checkError) {
-        console.error("Error checking company:", checkError);
-        toast.error(`Failed to delete company: ${checkError.message}`);
-        setIsDeleting(false);
-        onClose();
-        return;
-      }
-      
-      if (!checkData) {
-        console.error("Company not found:", companyId);
-        toast.error("Failed to delete company: Record not found");
-        setIsDeleting(false);
-        onClose();
-        return;
-      }
-      
-      // Now perform the delete operation
-      const { error: deleteError } = await supabase
+      // Perform the delete operation
+      const { error } = await supabase
         .from('companies')
         .delete()
         .eq('id', companyId);
-
-      if (deleteError) {
-        console.error("Error deleting company:", deleteError);
-        toast.error(`Failed to delete company: ${deleteError.message}`);
+      
+      if (error) {
+        console.error("Error deleting company:", error);
+        toast.error(`Failed to delete company: ${error.message}`);
       } else {
         console.log("Company deleted successfully");
         toast.success("Company deleted successfully");
