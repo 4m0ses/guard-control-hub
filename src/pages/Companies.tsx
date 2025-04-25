@@ -18,9 +18,10 @@ const Companies = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const { data: companies = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['companies'],
+    queryKey: ['companies', refreshTrigger],
     queryFn: async () => {
       console.log("Fetching companies...")
       const { data, error } = await supabase
@@ -38,6 +39,7 @@ const Companies = () => {
     },
   });
 
+  // Force refetch when the component mounts
   useEffect(() => {
     refetch();
   }, [refetch]);
@@ -52,14 +54,15 @@ const Companies = () => {
 
   const handleDeleteClick = (company) => {
     console.log("Delete clicked for company:", company);
-    console.log("Company ID:", company.id);
-    console.log("Company ID type:", typeof company.id);
+    console.log("Delete company with ID:", company.id);
+    console.log("Delete clicked for company:", company);
     setSelectedCompany(company);
     setIsDeleteDialogOpen(true);
   };
 
   const handleOperationSuccess = () => {
     console.log("Operation successful, refetching companies...");
+    setRefreshTrigger(prev => prev + 1); // Change the key to force refetch
     refetch();
   };
 

@@ -44,11 +44,29 @@ export function DeleteCompanyDialog({
     setIsDeleting(true);
     
     try {
-      // Perform the delete operation with proper error handling
+      // Check if the company exists first
+      const { data: checkData, error: checkError } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('id', companyId)
+        .single();
+      
+      console.log("Company check result:", { checkData, checkError });
+      
+      if (checkError) {
+        console.error("Error checking company existence:", checkError);
+        toast.error(`Company not found: ${checkError.message}`);
+        setIsDeleting(false);
+        onClose();
+        return;
+      }
+      
+      // Perform the delete operation
       const { data, error } = await supabase
         .from('companies')
         .delete()
-        .eq('id', companyId);
+        .eq('id', companyId)
+        .select();
       
       console.log("Delete operation response:", { data, error });
       
@@ -56,9 +74,16 @@ export function DeleteCompanyDialog({
         console.error("Error deleting company:", error);
         toast.error(`Failed to delete company: ${error.message}`);
       } else {
-        console.log("Company deleted successfully");
-        toast.success("Company deleted successfully");
-        onSuccess(); // Call onSuccess to trigger refetch
+        // Verify if any row was actually deleted
+        if (!data || data.length === 0) {
+          console.warn("No company was deleted");
+          toast.warning("No company was deleted. It may have already been removed.");
+        } else {
+          console.log("Company deleted successfully");
+          toast.success("Company deleted successfully");
+          // Ensure the onSuccess callback is called to refresh the companies list
+          onSuccess();
+        }
       }
     } catch (error: any) {
       console.error("Exception deleting company:", error);
