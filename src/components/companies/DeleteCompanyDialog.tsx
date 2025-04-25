@@ -42,11 +42,11 @@ export function DeleteCompanyDialog({
     setIsDeleting(true);
     
     try {
-      // Delete the company without using aggregate functions in RETURNING
       const { error } = await supabase
         .from('companies')
         .delete()
-        .eq('id', companyId);
+        .eq('id', companyId)
+        .maybeSingle();
       
       if (error) {
         console.error("Error deleting company:", error);
@@ -54,7 +54,6 @@ export function DeleteCompanyDialog({
       } else {
         console.log("Company deleted successfully");
         toast.success(`Company "${companyName}" deleted successfully`);
-        // Call onSuccess to refresh the companies list
         onSuccess();
       }
     } catch (error: any) {

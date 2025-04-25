@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -18,15 +17,15 @@ const Companies = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const { data: companies = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['companies', refreshTrigger],
+    queryKey: ['companies'],
     queryFn: async () => {
       console.log("Fetching companies...")
       const { data, error } = await supabase
         .from('companies')
         .select('*')
+        .order('name')
       
       if (error) {
         console.error('Error fetching companies:', error)
@@ -39,11 +38,6 @@ const Companies = () => {
     },
   });
 
-  // Force refetch when the component mounts
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
-
   const handleEditClick = (company) => {
     console.log("Edit clicked for company:", company);
     setSelectedCompany(company);
@@ -51,15 +45,14 @@ const Companies = () => {
   };
 
   const handleDeleteClick = (company) => {
-    console.log("Delete clicked for company with ID:", company.id);
-    console.log("Delete clicked for company object:", company);
+    console.log("Delete clicked for company:", company);
     setSelectedCompany(company);
     setIsDeleteDialogOpen(true);
   };
 
-  const handleOperationSuccess = () => {
+  const handleOperationSuccess = async () => {
     console.log("Operation successful, refetching companies...");
-    setRefreshTrigger(prev => prev + 1); // Change the key to force refetch
+    await refetch();
   };
 
   const filteredCompanies = companies.filter(company => 
